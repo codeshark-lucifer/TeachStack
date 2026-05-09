@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  
+  --color-blue-brand: #3467d6;
+  --color-cyan-brand: #039bb8;
+  --color-orange-brand: #d88718;
+  --color-green-brand: #25845a;
+  --color-gold-brand: #b88311;
+  --color-red-brand: #cf4242;
+
+  --shadow-brand: var(--shadow);
+  --radius-brand: 8px;
+  
+  --font-kantumruy: var(--font-kantumruy);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Configure dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  --primary: #9a623a;
+  --ink: #202124;
+  --muted: #6d7280;
+  --line: #e7e1dc;
+  --paper: #fffaf5;
+  --surface: #ffffff;
+  --background: #f4f6f8;
+  --shadow: 0 14px 35px rgba(51, 37, 26, 0.12);
+}
+
+.dark {
+  --primary: #d69871;
+  --ink: #e8eaed;
+  --muted: #9aa0a6;
+  --line: #44474a;
+  --paper: #202124;
+  --surface: #2d2e31;
+  --background: #121212;
+  --shadow: 0 14px 35px rgba(0, 0, 0, 0.6);
+}
+
+@layer base {
+  body {
+    background: linear-gradient(180deg, rgba(154, 98, 58, 0.05), rgba(3, 155, 184, 0.03)), var(--background);
+    color: var(--ink);
+    font-family: var(--font-kantumruy);
+    @apply min-h-screen flex justify-center p-0 md:p-8;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+  
+  a {
+    @apply no-underline text-inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* We keep app-shell as it's a layout-level abstraction used in layout.tsx */
+  .app-shell {
+    @apply w-full max-w-[390px] md:max-w-[860px] lg:max-w-[1040px] min-h-screen md:min-h-0 bg-paper border border-[rgba(154,98,58,0.16)] md:rounded-xl p-4 md:p-7 shadow-brand;
+  }
+}
+
+/* Custom Animations from Prototype */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-enter {
+  opacity: 0;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }

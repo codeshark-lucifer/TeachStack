@@ -51,22 +51,27 @@
     background: linear-gradient(180deg, rgba(154, 98, 58, 0.05), rgba(3, 155, 184, 0.03)), var(--background);
     color: var(--ink);
     font-family: var(--font-kantumruy);
-    @apply min-h-screen flex justify-center p-0 md:p-8;
+    @apply min-h-screen flex justify-center p-0 md:p-8 transition-colors duration-500 ease-in-out;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold;
+    @apply font-bold transition-colors duration-500;
   }
   
-  a {
-    @apply no-underline text-inherit;
+  a, button, input, select, textarea {
+    @apply transition-colors duration-500;
   }
 }
 
 @layer components {
   /* We keep app-shell as it's a layout-level abstraction used in layout.tsx */
   .app-shell {
-    @apply w-full max-w-[390px] md:max-w-[860px] lg:max-w-[1040px] min-h-screen md:min-h-0 bg-paper border border-[rgba(154,98,58,0.16)] md:rounded-xl p-4 md:p-7 shadow-brand;
+    @apply w-full max-w-[390px] md:max-w-[860px] lg:max-w-[1040px] min-h-screen md:min-h-0 bg-paper border border-[rgba(154,98,58,0.16)] md:rounded-xl p-4 md:p-7 shadow-brand transition-all duration-500 ease-in-out;
+  }
+
+  /* Ensure containers also transition smoothly */
+  header, nav, section, .bg-surface, .bg-paper, .border-line {
+    @apply transition-colors duration-500 ease-in-out;
   }
 }
 

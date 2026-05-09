@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Topbar } from "@/components/topbar";
-import { Question, examTypes, getCategories } from "@/lib/data";
+import { Question, examTypes } from "@/lib/data";
 import {
   RotateCcw,
   Home,

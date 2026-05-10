@@ -29,3 +29,19 @@ export interface SubTopic {
   icon: string;
   description: string;
 }
+
+export interface QuizResult {
+  id?: string;
+  userId?: string;
+  categoryId: string;
+  typeId: string;
+  rawTypeId?: string;
+  rawLevelId?: string;
+  rawSetId?: string;
+  correct: number;
+  total: number;
+  questions: Question[];
+  answers: (number | null)[];
+  completedAt: string;
+  timeSpent?: number;
+}

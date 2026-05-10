@@ -3,32 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Topbar } from "@/components/topbar";
-import { Question } from "@/lib/types";
+import { QuizResult } from "@/lib/types";
 import {
-  RotateCcw,
-  Home,
   AlertCircle,
+  ArrowRight,
   Check,
-  X,
   Eye,
   EyeOff,
+  Home,
+  RotateCcw,
   Trophy,
-  ArrowRight,
+  X,
 } from "lucide-react";
-
-interface QuizResult {
-  categoryId: string;
-  typeId: string;
-  rawTypeId?: string;
-  rawLevelId?: string;
-  rawSetId?: string;
-  correct: number;
-  total: number;
-  questions: Question[];
-  answers: (number | null)[];
-  completedAt: string;
-  timeSpent?: number;
-}
 
 export default function ResultPage() {
   const [result, setResult] = useState<QuizResult | null>(null);

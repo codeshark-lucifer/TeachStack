@@ -1,4 +1,5 @@
 import { ExamCategory, Question, ExamType, SubTopic } from "./types";
+import { unstable_rethrow } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const API_SECRET = process.env.API_SECRET || "93be302a20343ee34f4049757949185554b479d6ff847766183412724981177d";
@@ -62,6 +63,7 @@ async function fetchWithAuth(endpoint: string) {
 
     return response.json();
   } catch (error) {
+    unstable_rethrow(error);
     console.error(`Fetch error for ${url}:`, error);
     return null;
   }

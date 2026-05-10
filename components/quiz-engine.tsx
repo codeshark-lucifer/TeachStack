@@ -3,8 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ExamCategory, Question, ExamType, SubTopic } from "@/lib/types";
+import { ExamCategory, Question, ExamType, SubTopic, QuizResult } from "@/lib/types";
 import { ChevronRight, Send, X, CheckCircle2, AlertCircle, Timer, Award } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { db } from "@/lib/firebase";
+import { ref, push, set } from "firebase/database";
 
 interface QuizEngineProps {
   category: ExamCategory;
@@ -52,6 +55,7 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes default
   const [isFinished, setIsFinished] = useState(false);
+  const { user } = useAuth();
 
   // Initialize Quiz
   useEffect(() => {
@@ -141,19 +145,19 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
     }
   };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     setIsFinished(true);
     const correct = shuffledQuestions.reduce((acc, q, idx) => {
       if (selectedAnswers[idx] === q.answer) return acc + 1;
       return acc;
     }, 0);
 
-    const result = {
+    const result: QuizResult = {
       categoryId: category.id,
       typeId: typeId,
       rawTypeId: typeId,
-      rawLevelId: levelId,
-      rawSetId: setId,
+      rawLevelId: levelId || undefined,
+      rawSetId: setId || undefined,
       correct,
       total: shuffledQuestions.length,
       questions: shuffledQuestions,
@@ -162,9 +166,27 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
       timeSpent: (shuffledQuestions.length * 60) - timeLeft
     };
 
+    // Save to LocalStorage for immediate display in /result
     localStorage.setItem("TeachStackResult", JSON.stringify(result));
+
+    // Save to Firebase if user is authenticated
+    if (user) {
+      try {
+        const resultsRef = ref(db, `user_progress/${user.uid}`);
+        const newResultRef = push(resultsRef);
+        await set(newResultRef, {
+          ...result,
+          userId: user.uid,
+          id: newResultRef.key
+        });
+        console.log("[QuizEngine] Result saved to Firebase");
+      } catch (error) {
+        console.error("[QuizEngine] Error saving to Firebase:", error);
+      }
+    }
+
     router.push("/result");
-  }, [category.id, levelId, router, selectedAnswers, setId, shuffledQuestions, timeLeft, typeId]);
+  }, [category.id, levelId, router, selectedAnswers, setId, shuffledQuestions, timeLeft, typeId, user]);
 
   if (isLoading) {
     return (

@@ -102,6 +102,7 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
       console.log(`[QuizEngine] No set specified. Loading ${finalQuestions.length} random questions.`);
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShuffledQuestions(finalQuestions);
     setSelectedAnswers(new Array(finalQuestions.length).fill(null));
     setTimeLeft(finalQuestions.length * 60); // 1 minute per question

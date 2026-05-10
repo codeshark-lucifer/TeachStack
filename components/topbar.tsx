@@ -8,6 +8,10 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "@/components/avatar";
 
+type ViewTransitionDocument = Document & {
+  startViewTransition?: (callback: () => void) => void;
+};
+
 export function Topbar() {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,7 +22,7 @@ export function Topbar() {
     
     // Check if View Transitions API is supported
     if (typeof document !== "undefined" && "startViewTransition" in document) {
-      (document as any).startViewTransition(() => {
+      (document as ViewTransitionDocument).startViewTransition?.(() => {
         setTheme(nextTheme);
       });
     } else {

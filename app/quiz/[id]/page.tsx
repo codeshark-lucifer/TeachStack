@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getCategoryById, getQuestionsByCategoryId, getExamTypes, getSubTopicData } from "@/lib/api";
+import { getCategoryById, getExamTypes, getSubTopicData } from "@/lib/api";
 import { QuizEngine } from "@/components/quiz-engine";
 
 export default async function QuizPage({

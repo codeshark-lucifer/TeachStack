@@ -6,6 +6,7 @@ import { ArrowLeft, Mail, Lock, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +25,8 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as FirebaseError;
       setError(err.message || "ការចូលប្រើប្រាស់បានបរាជ័យ។");
     } finally {
       setLoading(false);
@@ -37,7 +39,8 @@ export default function LoginPage() {
     try {
       await method();
       router.push("/");
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as FirebaseError;
       setError(err.message || "ការចូលប្រើប្រាស់បានបរាជ័យ។");
     } finally {
       setLoading(false);

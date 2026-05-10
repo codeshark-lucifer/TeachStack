@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { ArrowLeft, User, Mail, Save, LogOut, History, Award, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, User, Save, LogOut, History, Award, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/avatar";
@@ -24,6 +24,7 @@ export default function ProfilePage() {
       router.push("/login");
     }
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(user.displayName || "");
 
       // Load History from Firebase
@@ -55,7 +56,7 @@ export default function ProfilePage() {
     try {
       await updateUserDisplayName(name);
       setMessage({ type: "success", text: "ព័ត៌មានត្រូវបានរក្សាទុក!" });
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "ការរក្សាទុកបានបរាជ័យ។" });
     } finally {
       setIsUpdating(false);

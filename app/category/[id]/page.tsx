@@ -1,9 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Topbar } from "@/components/topbar";
 import { getCategoryById, getExamTypes, getSubTopicData } from "@/lib/api";
 import { ChevronRight, ArrowLeft, RefreshCw } from "lucide-react";
+import { ExamType, SubTopic } from "@/lib/types";
+
+type DisplayItem = (ExamType | SubTopic) & {
+  color?: string;
+};
+
+function getDisplayColor(item: DisplayItem, fallback: string) {
+  return typeof item.color === "string" ? item.color : fallback;
+}
 
 export default async function CategoryPage({
   params,
@@ -51,8 +60,8 @@ export default async function CategoryPage({
     if (currentTopic) {
       headerTitle = currentTopic.title;
       headerDesc = currentTopic.description;
-      headerColor = (currentTopic as any).color || headerColor;
-      headerIconHtml = <i className={`${(currentTopic as any).icon} text-[36px]`} style={{ color: headerColor }}></i>;
+      headerColor = getDisplayColor(currentTopic, headerColor);
+      headerIconHtml = <i className={`${currentTopic.icon} text-[36px]`} style={{ color: headerColor }}></i>;
     }
   } else if (type) {
     const currentType = examTypes.find(t => t.id === type);
@@ -65,7 +74,7 @@ export default async function CategoryPage({
   }
 
   // Determine display data
-  let displayData: any[] = [];
+  let displayData: DisplayItem[] = [];
   if (isExamSet) {
     for (let i = 1; i <= 20; i++) {
       displayData.push({
@@ -83,7 +92,7 @@ export default async function CategoryPage({
 
   // Question count logic
   const questions = category.questions || [];
-  const getQuestionCount = (item: any) => {
+  const getQuestionCount = (item: DisplayItem) => {
     if (isExamSet) return null;
     if (!item.id) return 0;
     

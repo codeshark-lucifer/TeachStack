@@ -1,8 +1,12 @@
+import "server-only";
+
 import { ExamCategory, Question, ExamType, SubTopic } from "./types";
 import { unstable_rethrow } from "next/navigation";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-const API_SECRET = process.env.API_SECRET || "93be302a20343ee34f4049757949185554b479d6ff847766183412724981177d";
+const API_BASE_URL =
+  process.env.BACKEND_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3001";
 
 // Local image mapping for fallback or cleaning backend paths
 const localImageMap: Record<string, string> = {
@@ -16,14 +20,21 @@ const localImageMap: Record<string, string> = {
 /**
  * Ensures we always have an array even if Firebase returns an object with numeric/string keys
  */
-function ensureArray<T>(data: any): T[] {
-  if (!data || (typeof data === "object" && data.error)) return [];
+type RawCategory = Partial<ExamCategory> & {
+  id: string;
+  image?: string;
+  color?: string;
+  questions?: unknown;
+};
+
+function ensureArray<T>(data: unknown): T[] {
+  if (!data || (typeof data === "object" && "error" in data)) return [];
   if (Array.isArray(data)) return data.filter(Boolean) as T[];
   if (typeof data === "object") return (Object.values(data).filter(Boolean) as unknown) as T[];
   return [];
 }
 
-function transformCategory(category: any): ExamCategory {
+function transformCategory(category: RawCategory | null): ExamCategory {
   if (!category) return {} as ExamCategory;
 
   let image = category.image || "";
@@ -37,19 +48,26 @@ function transformCategory(category: any): ExamCategory {
 
   return {
     ...category,
+    title: category.title || "",
+    shortTitle: category.shortTitle || "",
     image,
     color: category.color || "#3467d6",
+    description: category.description || "",
     questions: ensureArray<Question>(category.questions),
   };
 }
 
 async function fetchWithAuth(endpoint: string) {
+  if (!process.env.API_SECRET) {
+    throw new Error("API_SECRET is required for server-side API requests.");
+  }
+
   const url = `${API_BASE_URL}${endpoint}`;
   
   try {
     const response = await fetch(url, {
       headers: {
-        "x-api-token": API_SECRET,
+        "x-api-token": process.env.API_SECRET,
         "Accept": "application/json",
       },
       // Disable caching for live data from Firebase
@@ -73,7 +91,7 @@ export async function getCategories(): Promise<ExamCategory[]> {
   const data = await fetchWithAuth("/api/categories");
   if (!data) return [];
   
-  const categories = ensureArray<any>(data);
+  const categories = ensureArray<RawCategory>(data);
   return categories.map(transformCategory);
 }
 

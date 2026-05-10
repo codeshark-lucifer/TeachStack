@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Mail, Lock, UserPlus, User } from "lucide-react";
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -35,7 +36,8 @@ export default function RegisterPage() {
         displayName: name,
       });
       router.push("/");
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as FirebaseError;
       setError(err.message || "ការចុះឈ្មោះបានបរាជ័យ។");
     } finally {
       setLoading(false);
@@ -48,7 +50,8 @@ export default function RegisterPage() {
     try {
       await method();
       router.push("/");
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as FirebaseError;
       setError(err.message || "ការចូលប្រើប្រាស់បានបរាជ័យ។");
     } finally {
       setLoading(false);

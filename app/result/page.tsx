@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Topbar } from "@/components/topbar";
-import { QuizResult } from "@/lib/types";
+import { ExamType, QuizResult } from "@/lib/types";
 import {
   AlertCircle,
   ArrowRight,
@@ -17,20 +17,22 @@ import {
 } from "lucide-react";
 
 export default function ResultPage() {
-  const [result, setResult] = useState<QuizResult | null>(null);
+  const [result] = useState<QuizResult | null>(() => {
+    if (typeof window === "undefined") return null;
+
+    const lastResult = localStorage.getItem("TeachStackResult");
+    return lastResult ? JSON.parse(lastResult) : null;
+  });
   const [showReview, setShowReview] = useState(false);
-  const [examTypes, setExamTypes] = useState<any[]>([]);
+  const [examTypes, setExamTypes] = useState<ExamType[]>([]);
 
   useEffect(() => {
-    const lastResult = localStorage.getItem("TeachStackResult");
-    if (lastResult) {
-      setResult(JSON.parse(lastResult));
-    }
-    
-    // Fetch exam types for display
-    import("@/lib/api").then(api => {
-      api.getExamTypes().then(setExamTypes);
-    });
+    fetch("/api/exam-types")
+      .then((response) => (response.ok ? response.json() : []))
+      .then((data) => {
+        setExamTypes(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setExamTypes([]));
   }, []);
 
   // ... (rest of the component)

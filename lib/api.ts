@@ -17,8 +17,8 @@ const localImageMap: Record<string, string> = {
  */
 function ensureArray<T>(data: any): T[] {
   if (!data || (typeof data === "object" && data.error)) return [];
-  if (Array.isArray(data)) return data.filter(Boolean);
-  if (typeof data === "object") return Object.values(data).filter(Boolean);
+  if (Array.isArray(data)) return data.filter(Boolean) as T[];
+  if (typeof data === "object") return (Object.values(data).filter(Boolean) as unknown) as T[];
   return [];
 }
 

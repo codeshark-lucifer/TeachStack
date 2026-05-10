@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Topbar } from "@/components/topbar";
-import { getCategoryById } from "@/lib/api";
-import { examTypes, subTopicData } from "@/lib/data";
+import { getCategoryById, getExamTypes, getSubTopicData } from "@/lib/api";
 import { ChevronRight, ArrowLeft } from "lucide-react";
 
 export default async function CategoryPage({
@@ -15,7 +14,13 @@ export default async function CategoryPage({
 }) {
   const { id } = await params;
   const { type, topic } = await searchParams;
-  const category = await getCategoryById(id);
+  
+  // Fetch all necessary data in parallel
+  const [category, examTypes, subTopicData] = await Promise.all([
+    getCategoryById(id),
+    getExamTypes(),
+    getSubTopicData()
+  ]);
 
   if (!category) {
     notFound();

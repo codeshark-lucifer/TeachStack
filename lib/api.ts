@@ -1,7 +1,6 @@
-import { ExamCategory, Question } from "./data";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
-const API_SECRET = process.env.API_SECRET || "your_api_secret_token";
+import { ExamCategory, Question, ExamType, SubTopic } from "./data";
+import { db } from "./firebase";
+import { ref, get, child } from "firebase/database";
 
 // Local image mapping for fallback or cleaning backend paths
 const localImageMap: Record<string, string> = {
@@ -36,32 +35,17 @@ function transformCategory(category: any): ExamCategory {
   };
 }
 
-async function fetchWithAuth(endpoint: string) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const response = await fetch(url, {
-    headers: {
-      "x-api-token": API_SECRET,
-    },
-    // Revalidate every hour for static-ish data
-    next: { revalidate: 3600 },
-  });
-
-  if (!response.ok) {
-    if (response.status === 404) return null;
-    throw new Error(`Failed to fetch from ${url}: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
 export async function getCategories(): Promise<ExamCategory[]> {
   try {
-    const data = await fetchWithAuth("/api/categories");
-    if (!data) return [];
+    const dbRef = ref(db);
+    const snapshot = await get(child(dbRef, "categories"));
     
-    const categories = Array.isArray(data) ? data : Object.values(data);
-    return categories.map(transformCategory);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const categories = Object.values(data);
+      return categories.map(transformCategory);
+    }
+    return [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -70,8 +54,13 @@ export async function getCategories(): Promise<ExamCategory[]> {
 
 export async function getCategoryById(id: string): Promise<ExamCategory | null> {
   try {
-    const data = await fetchWithAuth(`/api/category/${id}`);
-    return data ? transformCategory(data) : null;
+    const dbRef = ref(db);
+    const snapshot = await get(child(dbRef, `categories/${id}`));
+    
+    if (snapshot.exists()) {
+      return transformCategory(snapshot.val());
+    }
+    return null;
   } catch (error) {
     console.error(`Error fetching category ${id}:`, error);
     return null;
@@ -80,10 +69,47 @@ export async function getCategoryById(id: string): Promise<ExamCategory | null> 
 
 export async function getQuestionsByCategoryId(id: string): Promise<Question[]> {
   try {
-    const data = await fetchWithAuth(`/api/questions/${id}`);
-    return data || [];
+    const dbRef = ref(db);
+    const snapshot = await get(child(dbRef, `categories/${id}/questions`));
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      return Array.isArray(data) ? data : Object.values(data);
+    }
+    return [];
   } catch (error) {
     console.error(`Error fetching questions for ${id}:`, error);
     return [];
+  }
+}
+
+export async function getExamTypes(): Promise<ExamType[]> {
+  try {
+    const dbRef = ref(db);
+    const snapshot = await get(child(dbRef, "examTypes"));
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      return Array.isArray(data) ? data : Object.values(data);
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching exam types:", error);
+    return [];
+  }
+}
+
+export async function getSubTopicData(): Promise<Record<string, SubTopic[]>> {
+  try {
+    const dbRef = ref(db);
+    const snapshot = await get(child(dbRef, "subTopicData"));
+    
+    if (snapshot.exists()) {
+      return snapshot.val();
+    }
+    return {};
+  } catch (error) {
+    console.error("Error fetching sub topic data:", error);
+    return {};
   }
 }

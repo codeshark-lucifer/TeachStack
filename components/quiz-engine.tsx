@@ -40,6 +40,22 @@ function shuffleQuizQuestions(items: Question[]): Question[] {
   });
 }
 
+function removeUndefinedValues<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(removeUndefinedValues) as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => [key, removeUndefinedValues(entryValue)])
+    ) as T;
+  }
+
+  return value;
+}
+
 export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,13 +92,7 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
     });
 
     console.log(`[QuizEngine] Filtered pool size: ${filteredPool.length}`);
-
-    // CRITICAL: If filtering by tags results in 0 questions, fall back to ALL questions
-    // in that category so the user doesn't see an empty screen.
-    const pool = filteredPool.length > 0 ? filteredPool : category.questions;
-    if (filteredPool.length === 0) {
-      console.warn(`[QuizEngine] Filtering returned 0 questions. Falling back to full pool of ${category.questions.length}.`);
-    }
+    const pool = filteredPool;
     
     // Logic for Sets: Deterministic selection if possible
     let finalQuestions: Question[] = [];
@@ -94,8 +104,8 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
         finalQuestions = pool.slice(startIdx, startIdx + 20);
         console.log(`[QuizEngine] Loading Set ${setNum} (Questions ${startIdx + 1} to ${Math.min(startIdx + 20, pool.length)})`);
       } else {
-        finalQuestions = shuffleQuizQuestions(pool).slice(0, 20);
-        console.log(`[QuizEngine] Set ${setNum} out of range. Loading 20 random questions.`);
+        finalQuestions = [];
+        console.log(`[QuizEngine] Set ${setNum} out of range for the selected filters.`);
       }
     } else {
       finalQuestions = shuffleQuizQuestions(pool).slice(0, 20);
@@ -105,6 +115,7 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setShuffledQuestions(finalQuestions);
     setSelectedAnswers(new Array(finalQuestions.length).fill(null));
+    setCurrentIdx(0);
     setTimeLeft(finalQuestions.length * 60); // 1 minute per question
     setIsLoading(false);
   }, [category, typeId, levelId, setId]);
@@ -175,11 +186,11 @@ export function QuizEngine({ category, examTypes, subTopicData }: QuizEngineProp
       try {
         const resultsRef = ref(db, `user_progress/${user.uid}`);
         const newResultRef = push(resultsRef);
-        await set(newResultRef, {
+        await set(newResultRef, removeUndefinedValues({
           ...result,
           userId: user.uid,
           id: newResultRef.key
-        });
+        }));
         console.log("[QuizEngine] Result saved to Firebase");
       } catch (error) {
         console.error("[QuizEngine] Error saving to Firebase:", error);

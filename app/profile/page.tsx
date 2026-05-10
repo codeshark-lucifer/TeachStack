@@ -29,20 +29,28 @@ export default function ProfilePage() {
 
       // Load History from Firebase
       const historyRef = ref(db, `user_progress/${user.uid}`);
-      const unsubscribe = onValue(historyRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const resultsArray = Object.values(data) as QuizResult[];
-          // Sort by date descending
-          resultsArray.sort((a, b) => 
-            new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-          );
-          setHistory(resultsArray);
-        } else {
+      const unsubscribe = onValue(
+        historyRef,
+        (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const resultsArray = Object.values(data) as QuizResult[];
+            // Sort by date descending
+            resultsArray.sort((a, b) => 
+              new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+            );
+            setHistory(resultsArray);
+          } else {
+            setHistory([]);
+          }
+          setLoadingHistory(false);
+        },
+        (error) => {
+          console.error("[Profile] Failed to load quiz history:", error);
           setHistory([]);
+          setLoadingHistory(false);
         }
-        setLoadingHistory(false);
-      });
+      );
 
       return () => unsubscribe();
     }

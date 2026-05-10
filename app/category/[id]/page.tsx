@@ -40,6 +40,27 @@ export default async function CategoryPage({
 
   const isExamSet = !!topic;
   const isSubTopic = type && subTopicData[type] && !topic;
+  const questions = category.questions || [];
+
+  const matchesSelection = (questionTags: string[] | undefined, itemId?: string, levelId?: string) => {
+    if (!questionTags || questionTags.length === 0) {
+      return itemId === "general" || itemId === "mixed";
+    }
+
+    if (!itemId || itemId === "general") return true;
+
+    if (itemId === "mixed") {
+      if (!levelId) return true;
+      const allowedTags = (subTopicData[levelId] || []).map((subTopic) => subTopic.id);
+      return questionTags.some((tag) => allowedTags.includes(tag));
+    }
+
+    return questionTags.includes(itemId) && (!levelId || questionTags.includes(levelId));
+  };
+
+  const selectedQuestionCount = isExamSet
+    ? questions.filter((question) => matchesSelection(question.tags, topic, type)).length
+    : questions.length;
 
   // Determine header info
   let headerTitle = category.title;
@@ -76,7 +97,9 @@ export default async function CategoryPage({
   // Determine display data
   let displayData: DisplayItem[] = [];
   if (isExamSet) {
-    for (let i = 1; i <= 20; i++) {
+    const setCount = Math.ceil(selectedQuestionCount / 20);
+
+    for (let i = 1; i <= setCount; i++) {
       displayData.push({
         id: `set-${i}`,
         title: `វិញ្ញាសាទី ${i}`,
@@ -91,19 +114,13 @@ export default async function CategoryPage({
   }
 
   // Question count logic
-  const questions = category.questions || [];
   const getQuestionCount = (item: DisplayItem) => {
     if (isExamSet) return null;
     if (!item.id) return 0;
-    
-    // If it's "mixed", it contains all questions that have any of the tags from sub-topics of this type
-    if (item.id === "mixed" && type) {
-      const allowedTags = (subTopicData[type] || []).map(st => st.id);
-      return questions.filter(q => q.tags?.some(tag => allowedTags.includes(tag))).length;
-    }
-    
-    // Regular tag matching
-    return questions.filter(q => q.tags?.includes(item.id)).length;
+
+    return questions.filter((question) =>
+      matchesSelection(question.tags, item.id, isSubTopic ? type : undefined)
+    ).length;
   };
 
   // Back button logic

@@ -30,7 +30,7 @@ export function Avatar({ src, name, size = 44, className = "" }: AvatarProps) {
 
   return (
     <div 
-      className={`rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-line/10 ${className}`}
+      className={`rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-line/10 transition-all duration-500 ${className}`}
       style={{ width: size, height: size }}
     >
       {src ? (

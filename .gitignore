@@ -29,6 +29,8 @@
 .env.*
 !.env.example
 
+note.txt
+
 # debug
 npm-debug.log*
 yarn-debug.log*

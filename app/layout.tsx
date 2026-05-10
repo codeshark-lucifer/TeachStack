@@ -42,7 +42,6 @@ export default function RootLayout({
             attribute="class"
             defaultTheme="system"
             enableSystem
-            disableTransitionOnChange
           >
             <main className="app-shell">{children}</main>
           </ThemeProvider>

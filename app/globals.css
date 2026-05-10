@@ -69,10 +69,19 @@
     @apply w-full max-w-[390px] md:max-w-[860px] lg:max-w-[1040px] min-h-screen md:min-h-0 bg-paper border border-[rgba(154,98,58,0.16)] md:rounded-xl p-4 md:p-7 shadow-brand transition-all duration-500 ease-in-out;
   }
 
-  /* Ensure containers also transition smoothly */
-  header, nav, section, .bg-surface, .bg-paper, .border-line {
-    @apply transition-colors duration-500 ease-in-out;
+  /* Ensure containers and common elements transition smoothly */
+  header, nav, section, footer, aside, 
+  .bg-surface, .bg-paper, .bg-background,
+  .border-line, .text-ink, .text-muted, .text-primary {
+    @apply transition-all duration-500 ease-in-out;
   }
+}
+
+/* View Transitions API Animations */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in-out;
 }
 
 /* Custom Animations from Prototype */

@@ -13,27 +13,47 @@ export function Topbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
 
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    
+    // Check if View Transitions API is supported
+    if (typeof document !== "undefined" && "startViewTransition" in document) {
+      (document as any).startViewTransition(() => {
+        setTheme(nextTheme);
+      });
+    } else {
+      setTheme(nextTheme);
+    }
+  };
+
   const displayName = user?.displayName || user?.email?.split('@')[0] || "អ្នកប្រើប្រាស់";
 
   return (
     <>
-      <header className="flex items-center justify-between min-h-[54px] mb-[18px] sticky top-0 z-[100] bg-paper border-b border-line -mx-4 px-4 md:-mx-7 md:px-7">
+      <header className="flex items-center justify-between min-h-[54px] mb-[18px] sticky top-0 z-[100] bg-paper border-b border-line -mx-4 px-4 md:-mx-7 md:px-7 transition-all duration-500">
         <div className="flex gap-2 items-center">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-[42px] h-[42px] border border-line rounded-brand bg-surface text-primary inline-flex items-center justify-center cursor-pointer hover:bg-primary/5 transition-colors"
+            className="w-[42px] h-[42px] border border-line rounded-brand bg-surface text-primary inline-flex items-center justify-center cursor-pointer hover:bg-primary/5 transition-colors relative overflow-hidden"
             aria-label="បើកម៉ឺនុយ"
           >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <Menu 
+              size={20} 
+              className={`transition-all duration-500 absolute ${isMenuOpen ? "opacity-0 scale-0 rotate-90" : "opacity-100 scale-100 rotate-0"}`} 
+            />
+            <X 
+              size={20} 
+              className={`transition-all duration-500 absolute ${isMenuOpen ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 -rotate-90"}`} 
+            />
           </button>
           
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-[42px] h-[42px] border border-line rounded-brand bg-surface text-primary inline-flex items-center justify-center cursor-pointer hover:bg-primary/5 transition-colors"
+            onClick={toggleTheme}
+            className="w-[42px] h-[42px] border border-line rounded-brand bg-surface text-primary inline-flex items-center justify-center cursor-pointer hover:bg-primary/5 transition-colors relative overflow-hidden"
             aria-label="ប្តូរពណ៌ងងឹត"
           >
-            <Sun className="hidden dark:block" size={20} />
-            <Moon className="block dark:hidden" size={20} />
+            <Sun className="transition-all duration-500 rotate-0 scale-100 dark:-rotate-90 dark:scale-0 absolute" size={20} />
+            <Moon className="transition-all duration-500 rotate-90 scale-0 dark:rotate-0 dark:scale-100 absolute" size={20} />
           </button>
         </div>
 
@@ -64,8 +84,12 @@ export function Topbar() {
         </Link>
       </header>
 
-      {isMenuOpen && (
-        <nav className="flex flex-col gap-1 bg-surface border border-line rounded-brand p-2 mb-[18px] animate-in fade-in slide-in-from-top-2 duration-200">
+      <div 
+        className={`grid transition-all duration-500 ease-in-out overflow-hidden ${
+          isMenuOpen ? "grid-rows-[1fr] opacity-100 mb-[18px]" : "grid-rows-[0fr] opacity-0 mb-0"
+        }`}
+      >
+        <nav className="min-h-0 flex flex-col gap-1 bg-surface border border-line rounded-brand p-2">
           <Link
             href="/"
             className="flex items-center gap-3 rounded-md text-ink font-semibold px-4 py-3 hover:bg-primary/5 transition-colors"
@@ -123,7 +147,7 @@ export function Topbar() {
             </Link>
           )}
         </nav>
-      )}
+      </div>
     </>
   );
 }

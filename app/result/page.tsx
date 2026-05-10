@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Topbar } from "@/components/topbar";
-import { Question, examTypes } from "@/lib/data";
+import { Question } from "@/lib/types";
 import {
   RotateCcw,
   Home,
@@ -27,18 +27,27 @@ interface QuizResult {
   questions: Question[];
   answers: (number | null)[];
   completedAt: string;
+  timeSpent?: number;
 }
 
 export default function ResultPage() {
   const [result, setResult] = useState<QuizResult | null>(null);
   const [showReview, setShowReview] = useState(false);
+  const [examTypes, setExamTypes] = useState<any[]>([]);
 
   useEffect(() => {
     const lastResult = localStorage.getItem("TeachStackResult");
     if (lastResult) {
       setResult(JSON.parse(lastResult));
     }
+    
+    // Fetch exam types for display
+    import("@/lib/api").then(api => {
+      api.getExamTypes().then(setExamTypes);
+    });
   }, []);
+
+  // ... (rest of the component)
 
   // --------------------------------------------------------------------------
   // Empty State

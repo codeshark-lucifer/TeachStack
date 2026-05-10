@@ -1,40 +1,35 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
-import { ExamCategory } from "@/lib/data";
+import { ExamCategory } from "@/lib/types";
 
 interface CategoryCardProps {
   category: ExamCategory;
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
-  const isDeveloping = category.id !== "education";
-
   return (
     <Link
       href={`/category/${category.id}`}
-      className={`animate-enter bg-surface border border-line border-l-[5px] rounded-brand grid grid-cols-[62px_1fr_22px] items-center gap-3 p-3 transition-all hover:shadow-brand hover:-translate-y-0.5 ${isDeveloping ? 'opacity-60' : ''}`}
+      className="animate-enter bg-surface border border-line border-l-[5px] rounded-brand grid grid-cols-[62px_1fr_22px] items-center gap-3 p-3 transition-all hover:shadow-brand hover:-translate-y-0.5 group"
       style={{ borderLeftColor: category.color }}
     >
-      <Image
-        src={category.image}
-        alt={category.title}
-        width={62}
-        height={62}
-        className="object-contain"
-      />
-      <div>
-        <h3 className="text-[15px] font-bold leading-tight flex flex-wrap items-center gap-2" style={{ color: category.color }}>
-          {category.title}
-          {isDeveloping && (
-            <span className="text-[10px] bg-[#fff3e0] text-[#e67e22] px-2 py-0.5 rounded-full font-bold border border-[#e67e22]/30">
-              កំពុងអភិវឌ្ឍ
-            </span>
-          )}
-        </h3>
-        <p className="text-muted text-xs mt-1 leading-snug">{category.description}</p>
+      <div className="relative w-[62px] h-[62px] flex items-center justify-center bg-paper rounded-lg p-1 group-hover:scale-110 transition-transform">
+        <Image
+          src={category.image}
+          alt={category.title}
+          width={54}
+          height={54}
+          className="object-contain"
+        />
       </div>
-      <ChevronRight className="shrink-0" size={18} style={{ color: category.color }} />
+      <div>
+        <h3 className="text-[15px] font-bold leading-tight" style={{ color: category.color }}>
+          {category.title}
+        </h3>
+        <p className="text-muted text-xs mt-1 leading-snug line-clamp-2">{category.description}</p>
+      </div>
+      <ChevronRight className="shrink-0 group-hover:translate-x-1 transition-transform" size={18} style={{ color: category.color }} />
     </Link>
   );
 }
